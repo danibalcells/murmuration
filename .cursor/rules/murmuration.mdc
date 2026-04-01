@@ -24,15 +24,21 @@ An interactive web experience where poetry emerges from cellular automata. Words
 
 ## Persistence protocol
 
-A scratchpad lives at `SCRATCHPAD.md` in the project root. It holds current state, ideas backlog, design decisions, and open questions.
+`SCRATCHPAD.md` in the project root is this project's living memory. It has two critical sections:
 
-When starting a new session on this project:
-1. Read `SCRATCHPAD.md` to recover context and creative direction
-2. Check recent git log (`git log --oneline -10`) for what changed since last session
-3. Update the scratchpad as work progresses
-4. Before ending a session, update `SCRATCHPAD.md` with current state and any new ideas
+**Handoff** (top of file) — Instructions left by the previous session's agent for the next one. This is the most important thing to read. It captures intent, momentum, and mid-stream thinking that static state can't convey. Think of it as a letter from your past self.
 
-The scratchpad is committed to the repo. It is the project's living memory.
+**Everything else** — Current state, origin story, ideas backlog, design decisions, open questions.
+
+When starting a new session:
+1. Read the **Handoff** section of `SCRATCHPAD.md` immediately
+2. Read the rest of the scratchpad for broader context
+3. Check recent git log (`git log --oneline -10`) for what changed
+
+When ending a session:
+1. **Always** update the Handoff section with: what you were working on, what you'd do next, any open threads or half-formed ideas, anything the next agent should know
+2. Update the rest of the scratchpad if state has changed
+3. Commit the scratchpad
 
 ## Architecture
 

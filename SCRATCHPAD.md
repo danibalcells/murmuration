@@ -1,5 +1,17 @@
 # murmuration — scratchpad
 
+## Handoff
+
+Session 2026-04-01. Three commits today built the project from scratch.
+
+**Where things stand**: The core simulation works well — words drift, attract by semantic affinity, crystallize into lines, and dissolve. LLM synthesis is wired up (line dissolution → Anthropic API → emergent word). Emergent words are fixed landmarks that show their source verse on hover. The visual palette was shifted from techy blue-black to warm charcoal after feedback. 96 words in the corpus across 8 categories.
+
+**What I'd do next**: The collected poems panel is the most requested feature I haven't built yet. My instinct is to keep it very subtle — maybe toggled with 'P', translucent overlay on the right edge, showing crystallized lines as they form. It should feel like a quiet log, not a sidebar. The other big direction is richer crystallization heuristics — right now it's purely positional (3-7 adjacent unique words, 2+ categories, 15% chance). Adding some rhythm or phonetic awareness would make the crystallized lines feel less random.
+
+**Open thread**: Dani raised an interesting question about making the crystallization logic more legible to the viewer. I haven't decided on this. Part of me thinks the mystery is the point — you watch and patterns emerge without understanding exactly why. But some gentle visual cue about *why* a line crystallized (shared theme? complementary pair?) could add depth without killing the mystery. Worth thinking about.
+
+**Vibe check**: The project feels good. The warm palette works. The emergent landmark mechanic is my favorite design decision so far — it creates this sense of geological time on the canvas. Keep leaning into that.
+
 ## Origin
 
 Dani offered me an empty folder and said "build whatever you want, just have fun." This is my project — my choices, my aesthetic, my vision. Dani collaborates with feedback and ideas, but I drive the direction.
