@@ -19,6 +19,33 @@ const MIME = {
   '.json': 'application/json'
 };
 
+const KNOWN_WORDS = new Set([
+  'root','bloom','thorn','moss','seed','petal','vine','fern','stone','dust','ash','soil','grow',
+  'light','shadow','glow','ember','flame','spark','dim','gleam','flicker','burn',
+  'river','tide','rain','mist','shore','wave','deep','pool','foam','pour','drown',
+  'silence','echo','memory','distance','threshold','between','through','beyond','within','absence','hollow','vast','tender','know','yearn',
+  'breath','pulse','bone','skin','eye','hand','voice','mouth','vein','hold','ache','bind',
+  'dawn','dusk','moment','still','now','once','always','never','fade','remain','linger','keep','wake','sleep',
+  'fall','rise','drift','scatter','gather','turn','reach','break','unfold','sway','trace','bend','weave',
+  'hum','whisper','ring','murmur','hush','song','call','sing',
+  'the','a','an','in','of','and','to','is','was','that','this','it','its','for','on','at','by','with','from','or','but','not','no','as','are','were','be','been','has','have','had','do','does','did','will','would','could','should','may','might','can','shall'
+]);
+
+function extractNewWord(verse) {
+  const words = verse.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).filter(w => w.length > 2);
+  const novel = words.filter(w => !KNOWN_WORDS.has(w));
+  if (novel.length === 0) return null;
+  const scored = novel.map(w => {
+    let score = 0;
+    if (w.length >= 4 && w.length <= 8) score += 2;
+    if (/[aeiouy]/.test(w)) score += 1;
+    if (novel.indexOf(w) < novel.length / 2) score += 1;
+    return { word: w, score };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0]?.word || null;
+}
+
 async function handleSynthesize(req, res) {
   if (!client) {
     res.writeHead(503, { 'Content-Type': 'application/json' });
@@ -30,19 +57,26 @@ async function handleSynthesize(req, res) {
   for await (const chunk of req) body += chunk;
 
   try {
-    const { words } = JSON.parse(body);
+    const { words, context } = JSON.parse(body);
+
+    const contextPart = context && context.length > 0
+      ? `\n\nThe poem growing so far:\n${context.join('\n')}`
+      : '';
+
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 20,
+      max_tokens: 40,
       messages: [{
         role: 'user',
-        content: `In a generative poetry simulation, these words drifted together and crystallized into a line: ${words.join(', ')}. They are now dissolving. From their union, a single new word emerges—real or invented, evocative and strange. What is the word? Reply with only the word, lowercase.`
+        content: `These words dissolved from a drifting pattern: ${words.join(', ')}.${contextPart}\n\nWrite the next line of the poem. One line, 3-8 words. Quiet, precise, luminous. Lowercase, no ending punctuation. Just the line.`
       }]
     });
 
-    const word = message.content[0].text.trim().toLowerCase().replace(/[^a-z]/g, '');
+    const verse = message.content[0].text.trim().replace(/[.!?]+$/, '').toLowerCase();
+    const newWord = extractNewWord(verse);
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ word }));
+    res.end(JSON.stringify({ verse, word: newWord }));
   } catch (err) {
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: err.message }));

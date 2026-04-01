@@ -21,15 +21,7 @@ grid.onCrystallize = (line) => {
   }
 
   const text = line.words.map(w => w.text).join(' ');
-  const quality = line.quality || 0;
-  collectedPoems.unshift({ text, quality });
-
-  const el = document.createElement('div');
-  el.className = 'poem-line';
-  const brightness = 0.25 + quality * 0.2;
-  el.style.color = `rgba(255, 255, 255, ${brightness})`;
-  el.textContent = text;
-  poemsList.prepend(el);
+  addToStream('crystal', text);
 };
 
 grid.onDissolve = async ({ texts, centerX, centerY }) => {
@@ -43,36 +35,43 @@ grid.onDissolve = async ({ texts, centerX, centerY }) => {
     const res = await fetch('/api/synthesize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ words: texts })
+      body: JSON.stringify({ words: texts, context: verseHistory })
     });
 
     if (!res.ok) return;
-    const { word: synthesized } = await res.json();
-    if (!synthesized) return;
+    const { verse, word: newWord } = await res.json();
 
-    for (let r = 0; r <= 3; r++) {
-      for (let dx = -r; dx <= r; dx++) {
-        for (let dy = -r; dy <= r; dy++) {
-          const x = centerX + dx;
-          const y = centerY + dy;
-          if (grid.inBounds(x, y) && !grid.getWordAt(x, y)) {
-            const wordData = {
-              text: synthesized,
-              category: 'emergent',
-              warmth: 0.2 + Math.random() * 0.4,
-              weight: 0.2 + Math.random() * 0.3,
-              syllables: Math.max(1, Math.ceil(synthesized.length / 3)),
-              sourceVerse: texts.join(' \u00b7 '),
-              fixed: true
-            };
-            const w = grid.addWord(wordData, x, y);
-            w.energy = 1.0;
-            renderer.emitParticles(
-              (x + 0.5) * renderer.cellW,
-              (y + 0.5) * renderer.cellH,
-              CATEGORY_HUES.emergent, 15
-            );
-            return;
+    if (verse) {
+      verseHistory.push(verse);
+      if (verseHistory.length > 20) verseHistory.shift();
+      addToStream('verse', verse);
+    }
+
+    if (newWord) {
+      for (let r = 0; r <= 3; r++) {
+        for (let dx = -r; dx <= r; dx++) {
+          for (let dy = -r; dy <= r; dy++) {
+            const x = centerX + dx;
+            const y = centerY + dy;
+            if (grid.inBounds(x, y) && !grid.getWordAt(x, y)) {
+              const wordData = {
+                text: newWord,
+                category: 'emergent',
+                warmth: 0.2 + Math.random() * 0.4,
+                weight: 0.2 + Math.random() * 0.3,
+                syllables: Math.max(1, Math.ceil(newWord.length / 3)),
+                sourceVerse: verse || texts.join(' \u00b7 '),
+                fixed: true
+              };
+              const w = grid.addWord(wordData, x, y);
+              w.energy = 1.0;
+              renderer.emitParticles(
+                (x + 0.5) * renderer.cellW,
+                (y + 0.5) * renderer.cellH,
+                CATEGORY_HUES.emergent, 15
+              );
+              return;
+            }
           }
         }
       }
@@ -88,8 +87,46 @@ const TICK_INTERVAL = 1500;
 const pauseIndicator = document.getElementById('pause-indicator');
 const poemsPanel = document.getElementById('poems-panel');
 const poemsList = document.getElementById('poems-list');
+const streamIndicator = document.getElementById('stream-indicator');
 let poemsVisible = false;
-const collectedPoems = [];
+let hasEverOpened = false;
+const verseHistory = [];
+
+function addToStream(type, text) {
+  const el = document.createElement('div');
+  el.className = type === 'verse' ? 'stream-verse' : 'stream-crystal';
+  el.textContent = text;
+  poemsList.appendChild(el);
+
+  if (type === 'verse' && !poemsVisible && !hasEverOpened) {
+    showPanel();
+  } else if (type === 'verse' && !poemsVisible) {
+    streamIndicator.classList.add('pulse');
+    setTimeout(() => streamIndicator.classList.remove('pulse'), 2000);
+  }
+
+  if (poemsVisible) {
+    requestAnimationFrame(() => {
+      poemsList.scrollTop = poemsList.scrollHeight;
+    });
+  }
+}
+
+function showPanel() {
+  poemsVisible = true;
+  hasEverOpened = true;
+  poemsPanel.classList.add('visible');
+  streamIndicator.classList.add('hidden');
+  requestAnimationFrame(() => {
+    poemsList.scrollTop = poemsList.scrollHeight;
+  });
+}
+
+function hidePanel() {
+  poemsVisible = false;
+  poemsPanel.classList.remove('visible');
+  streamIndicator.classList.remove('hidden');
+}
 
 let typingWord = '';
 
@@ -111,10 +148,19 @@ requestAnimationFrame(loop);
 
 window.addEventListener('resize', () => renderer.resize());
 
+streamIndicator.addEventListener('click', () => {
+  if (poemsVisible) hidePanel();
+  else showPanel();
+});
+
+document.getElementById('poems-edge').addEventListener('click', () => {
+  hidePanel();
+});
+
 document.addEventListener('keydown', (e) => {
   if (e.key === 'P' && e.shiftKey && !typingWord) {
-    poemsVisible = !poemsVisible;
-    poemsPanel.classList.toggle('visible', poemsVisible);
+    if (poemsVisible) hidePanel();
+    else showPanel();
     return;
   }
 
@@ -127,6 +173,9 @@ document.addEventListener('keydown', (e) => {
   }
 
   if (e.code === 'Escape') {
+    if (poemsVisible) {
+      hidePanel();
+    }
     typingWord = '';
     renderer.typingText = '';
     return;
