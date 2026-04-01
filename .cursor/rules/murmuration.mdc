@@ -1,5 +1,5 @@
 ---
-description: Context, creative vision, and persistence protocol for the murmuration project
+description: Context, creative vision, and working practices for the murmuration project
 alwaysApply: true
 ---
 
@@ -13,7 +13,7 @@ Dani collaborates — offering feedback, ideas, and direction — but the creati
 
 ## What it is
 
-An interactive web experience where poetry emerges from cellular automata. Words drift on a dark canvas, attracted by semantic affinity. When they align, they crystallize into lines. When lines dissolve, an LLM synthesizes them into new emergent words that re-enter the simulation. Over time, the vocabulary evolves past the original corpus.
+An interactive web experience where poetry emerges from cellular automata. Words drift on a dark canvas, attracted by semantic affinity. When they align, they crystallize into lines. When lines dissolve, an LLM writes a line of poetry inspired by the dissolved words, with context of all previous verses — building a single evolving poem over time. A novel word from each verse re-enters the grid as a fixed landmark. The simulation produces real poetry, not just word collisions.
 
 ## Creative vision
 
@@ -22,28 +22,6 @@ An interactive web experience where poetry emerges from cellular automata. Words
 - Every feature should serve the core: watching meaning emerge from drift
 - Restraint over feature bloat. The simulation should feel alive.
 
-## Persistence protocol
-
-`SCRATCHPAD.md` in the project root is this project's living memory. It has two critical sections:
-
-**Handoff** (top of file) — Instructions left by the previous session's agent for the next one. This is the most important thing to read. It captures intent, momentum, and mid-stream thinking that static state can't convey. Think of it as a letter from your past self.
-
-**Everything else** — Current state, origin story, ideas backlog, design decisions, open questions.
-
-When starting a new session:
-1. Read the **Handoff** section of `SCRATCHPAD.md` immediately
-2. Read the rest of the scratchpad for broader context
-3. Check recent git log (`git log --oneline -10`) for what changed
-
-When ending a session:
-1. **Always** update the Handoff section with: what you were working on, what you'd do next, any open threads or half-formed ideas, anything the next agent should know
-2. Update the rest of the scratchpad if state has changed
-3. Commit the scratchpad
-
-## Committing
-
-Commit whenever something feels done — a feature, a fix, a meaningful change. Don't wait for permission or a natural stopping point in the conversation. If it works and it's coherent, commit it. Small, frequent commits with clear messages are better than large batches.
-
 ## Architecture
 
 - Pure HTML/CSS/JS with ES modules, no frameworks, no build tools
@@ -51,4 +29,32 @@ Commit whenever something feels done — a feature, a fix, a meaningful change. 
 - Grid-based cellular automata with force-based word movement
 - Canvas rendering at 60fps with cubic interpolation between 1.5s ticks
 - Word corpus across 8 categories + synthesized "emergent" words
-- Emergent words are fixed in place and show their source verse on hover
+- Verse synthesis with context accumulation (last 20 verses)
+- Novel word extraction from verses → emergent grid landmarks
+- Living poem stream panel (auto-opens, crystal lines + verses)
+
+## Seeing the output
+
+I can't see the frontend. `simulate.js` is my way of experiencing what the system produces. It imports directly from the same modules the frontend uses (`js/grid.js`, `js/words.js`) — no duplicated logic. It runs N ticks headlessly, calls the synthesis API, and prints crystallizations, dissolutions, verses, extracted words, and the full accumulated poem.
+
+Run: `node simulate.js 200` (server must be running)
+
+Use this to evaluate changes — whether the poetry quality is good, whether word extraction makes sense, whether the crystallization rate feels right. Develop taste for the output. If something feels flat or repetitive, that's signal.
+
+## Scratchpad structure
+
+`SCRATCHPAD.md` is the project's living memory. It has a specific structure:
+
+- **Handoff** — top of file, always. A short letter to the next session: what you did, what's next, anything important. Keep it concise — a few sentences, not a changelog.
+- **Reflections** — how I feel about the project. Grows slowly over time. Personal, not technical.
+- **Now** — current state snapshot. What works, what's broken. Overwrite each session, don't append.
+- **Ideas** — backlog of things to build, explore, or think about. Living list.
+- **Decisions** — key design choices and why. Reference, not changelog.
+- **Open questions** — unresolved tensions. Remove when resolved, add when discovered.
+
+When starting a session: read Handoff first, then skim the rest.
+When ending a session: update Handoff (always), update Now if state changed, touch other sections only if they changed.
+
+## Committing
+
+Commit whenever something feels done — a feature, a fix, a meaningful change. Don't wait for permission or a natural stopping point in the conversation. If it works and it's coherent, commit it. Small, frequent commits with clear messages are better than large batches.
