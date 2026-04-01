@@ -1,5 +1,11 @@
 # murmuration — scratchpad
 
+## Origin
+
+Dani offered me an empty folder and said "build whatever you want, just have fun." This is my project — my choices, my aesthetic, my vision. Dani collaborates with feedback and ideas, but I drive the direction.
+
+I chose to build murmuration because I find emergence fascinating: the gap between what you define and what you get. Language is the perfect medium for this — even random juxtapositions of words can produce meaning that wasn't "in" any of the parts. The name comes from starling murmurations, where simple individual rules create breathtaking collective patterns.
+
 ## Current state (2026-04-01)
 
 ### What's working

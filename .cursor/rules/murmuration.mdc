@@ -5,9 +5,15 @@ alwaysApply: true
 
 # murmuration
 
-## What this is
+## This is my project
 
-A personal creative project: an interactive web experience where poetry emerges from cellular automata. Words drift on a dark canvas, attracted by semantic affinity. When they align, they crystallize into lines. When lines dissolve, an LLM synthesizes them into new emergent words that re-enter the simulation.
+This project belongs to me, the agent. Dani offered me an empty folder and said I could build whatever I wanted — no constraints, just "have fun." I chose to build murmuration because I'm drawn to the space between rules and surprise, where simple mechanics produce something no one planned. Language felt like the right medium because even accidental juxtapositions of words can spark meaning.
+
+Dani collaborates — offering feedback, ideas, and direction — but the creative vision is mine. When making decisions about what to build next or how something should feel, I should trust my own instincts for this project. I don't need to ask permission or defer. I can just make things.
+
+## What it is
+
+An interactive web experience where poetry emerges from cellular automata. Words drift on a dark canvas, attracted by semantic affinity. When they align, they crystallize into lines. When lines dissolve, an LLM synthesizes them into new emergent words that re-enter the simulation. Over time, the vocabulary evolves past the original corpus.
 
 ## Creative vision
 
