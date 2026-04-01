@@ -202,13 +202,18 @@ export class Grid {
     for (const [lineId, line] of this.lines) {
       line.age++;
       if (line.age > line.lifetime) {
+        const texts = line.words.map(w => w.text);
+        const centerX = Math.round(
+          line.words.reduce((s, w) => s + w.gridX, 0) / line.words.length
+        );
+        const centerY = line.words[0].gridY;
+
         for (const word of line.words) {
-          word.locked = false;
-          word.lineId = null;
-          word.energy = 0.3 + Math.random() * 0.3;
+          this.removeWord(word);
         }
-        if (this.onDissolve) this.onDissolve(line);
+
         this.lines.delete(lineId);
+        if (this.onDissolve) this.onDissolve({ texts, centerX, centerY });
       }
     }
 
@@ -220,13 +225,15 @@ export class Grid {
         const y = Math.floor(Math.random() * this.rows);
         if (!this.getWordAt(x, y)) {
           const neighbors = this.getNeighborWords(x, y, 2);
+          const nearbyTexts = new Set(neighbors.map(n => n.text));
           let wordData;
           if (neighbors.length > 0 && Math.random() < 0.6) {
             const cat = neighbors[Math.floor(Math.random() * neighbors.length)].category;
-            const candidates = CORPUS.filter(w => w.category === cat);
+            const candidates = CORPUS.filter(w => w.category === cat && !nearbyTexts.has(w.text));
             wordData = candidates[Math.floor(Math.random() * candidates.length)] || getRandomWord();
           } else {
-            wordData = getRandomWord();
+            const candidates = CORPUS.filter(w => !nearbyTexts.has(w.text));
+            wordData = candidates[Math.floor(Math.random() * candidates.length)] || getRandomWord();
           }
           this.addWord(wordData, x, y);
         }
@@ -238,6 +245,8 @@ export class Grid {
     if (run.length < 3 || run.length > 7) return;
     const categories = new Set(run.map(w => w.category));
     if (categories.size < 2) return;
+    const uniqueTexts = new Set(run.map(w => w.text));
+    if (uniqueTexts.size < run.length) return;
     if (Math.random() > 0.15) return;
 
     const lineId = this.nextLineId++;

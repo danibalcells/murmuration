@@ -1,12 +1,13 @@
 export const CATEGORY_HUES = {
-  nature: 130,
-  light: 55,
-  water: 210,
-  abstract: 270,
-  body: 8,
-  time: 35,
-  movement: 175,
-  sound: 315
+  nature: 120,
+  light: 42,
+  water: 195,
+  abstract: 255,
+  body: 12,
+  time: 32,
+  movement: 165,
+  sound: 320,
+  emergent: 40
 };
 
 const COMPLEMENTS = [

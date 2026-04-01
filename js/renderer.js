@@ -7,6 +7,7 @@ export class Renderer {
     this.grid = grid;
     this.particles = [];
     this.startTime = -1;
+    this.typingText = '';
     this.resize();
   }
 
@@ -49,13 +50,13 @@ export class Renderer {
     const h = window.innerHeight;
 
     const gradient = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.7);
-    gradient.addColorStop(0, '#0d0d1f');
-    gradient.addColorStop(1, '#06060f');
+    gradient.addColorStop(0, '#16130e');
+    gradient.addColorStop(1, '#0b0a07');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, w, h);
 
     const t = this.easeInOutCubic(Math.min(tickProgress, 1));
-    const fontSize = Math.max(14, Math.min(22, this.cellW * 0.2));
+    const fontSize = Math.max(15, Math.min(26, this.cellW * 0.24));
     const globalAlpha = Math.min(1, (timestamp - this.startTime) / 3000);
 
     for (const word of this.grid.words.values()) {
@@ -68,22 +69,22 @@ export class Renderer {
       px += Math.sin(timestamp * 0.0008 + word.id * 2.3) * 3;
       py += Math.cos(timestamp * 0.001 + word.id * 1.9) * 2;
 
-      const hue = CATEGORY_HUES[word.category] || 0;
+      const hue = CATEGORY_HUES[word.category] || 40;
       const breathe = 0.85 + 0.15 * Math.sin(timestamp * 0.002 + word.id * 1.7);
 
       if (word.createdAt < 0) word.createdAt = timestamp;
       const fadeIn = Math.min(1, (timestamp - word.createdAt) / 1500);
 
       const alpha = (0.4 + word.energy * 0.6) * breathe * fadeIn * globalAlpha;
-      const saturation = 50 + word.energy * 40;
-      const lightness = 55 + word.energy * 20;
+      const saturation = 30 + word.energy * 25;
+      const lightness = 50 + word.energy * 20;
 
       ctx.font = `${word.locked ? 'italic ' : ''}300 ${fontSize}px 'Cormorant Garamond', Georgia, serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      ctx.shadowBlur = word.locked ? 25 : 12 * word.energy;
-      ctx.shadowColor = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha * 0.5})`;
+      ctx.shadowBlur = word.locked ? 15 : 8 * word.energy;
+      ctx.shadowColor = `hsla(${hue}, ${Math.round(saturation * 0.7)}%, ${lightness}%, ${alpha * 0.3})`;
 
       ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
       ctx.fillText(word.text, px, py);
@@ -104,8 +105,8 @@ export class Renderer {
       const decay = line.age > line.lifetime - 5 ? (line.lifetime - line.age) / 5 : 1;
       const lineAlpha = 0.12 * grow * Math.max(0, decay) * globalAlpha;
 
-      const hue = CATEGORY_HUES[first.category] || 0;
-      ctx.strokeStyle = `hsla(${hue}, 50%, 60%, ${lineAlpha})`;
+      const hue = CATEGORY_HUES[first.category] || 40;
+      ctx.strokeStyle = `hsla(${hue}, 40%, 55%, ${lineAlpha})`;
       ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.moveTo(startX, y);
@@ -128,8 +129,19 @@ export class Renderer {
 
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${p.hue}, 80%, 70%, ${p.life * 0.6 * globalAlpha})`;
+      ctx.fillStyle = `hsla(${p.hue}, 50%, 60%, ${p.life * 0.4 * globalAlpha})`;
       ctx.fill();
+    }
+
+    if (this.typingText) {
+      const cursorVisible = Math.sin(timestamp * 0.004) > 0;
+      const display = this.typingText + (cursorVisible ? '\u2502' : ' ');
+      ctx.font = `300 18px 'Cormorant Garamond', Georgia, serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.fillText(display, w / 2, h - 40);
     }
   }
 }
