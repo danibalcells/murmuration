@@ -2,15 +2,21 @@
 
 ## Handoff
 
-Session 2026-04-01. Three commits today built the project from scratch.
+Session 2026-04-01 (second session). Two features built this session:
 
-**Where things stand**: The core simulation works well — words drift, attract by semantic affinity, crystallize into lines, and dissolve. LLM synthesis is wired up (line dissolution → Anthropic API → emergent word). Emergent words are fixed landmarks that show their source verse on hover. The visual palette was shifted from techy blue-black to warm charcoal after feedback. 96 words in the corpus across 8 categories.
+**What I did**: 
+1. *Smarter crystallization* — Replaced the flat 15% crystallization probability with a quality-scored system. `scorePoetryRun()` in `words.js` evaluates syllable rhythm variety, warmth coherence, complement pair presence, and alliteration. The score weights the probability: bad runs → 3% chance, decent runs → ~16%, excellent runs → up to 30%. This means lines that actually read well crystallize more often.
+2. *Collected poems panel* — Translucent overlay on the right edge, toggled with Shift+P. Lines accumulate newest-first as they crystallize. Higher-quality lines appear slightly brighter (alpha 0.25–0.45 based on quality score). The panel has a gradient left edge so it fades into the canvas rather than feeling like a hard UI element. CSS animation on new lines (fade up).
 
-**What I'd do next**: The collected poems panel is the most requested feature I haven't built yet. My instinct is to keep it very subtle — maybe toggled with 'P', translucent overlay on the right edge, showing crystallized lines as they form. It should feel like a quiet log, not a sidebar. The other big direction is richer crystallization heuristics — right now it's purely positional (3-7 adjacent unique words, 2+ categories, 15% chance). Adding some rhythm or phonetic awareness would make the crystallized lines feel less random.
+**Where things stand**: Both features are integrated and the server runs clean. The quality scoring and poems panel work together — the scoring makes lines worth collecting, and the panel makes the collection visible. The simulation now has memory.
 
-**Open thread**: Dani raised an interesting question about making the crystallization logic more legible to the viewer. I haven't decided on this. Part of me thinks the mystery is the point — you watch and patterns emerge without understanding exactly why. But some gentle visual cue about *why* a line crystallized (shared theme? complementary pair?) could add depth without killing the mystery. Worth thinking about.
+**What I'd do next**: 
+- Visual feedback for quality on the *canvas* itself — higher-quality crystallized lines could have a subtly different glow or underline weight. Right now quality only affects the poems panel.
+- Vertical and diagonal crystallization — the simulation only looks for horizontal runs. Vertical lines of poetry feel natural and would add visual variety.
+- The open question about legibility is partly answered by the quality scoring (the system now has opinions about what's good), but the viewer still can't see *why*. Maybe complement pairs could get a faint connecting arc when they're in a crystallized line together.
+- Seasons/moods — shifting the color palette and word tendencies over time. This is the feature I'm most excited about for the future.
 
-**Vibe check**: The project feels good. The warm palette works. The emergent landmark mechanic is my favorite design decision so far — it creates this sense of geological time on the canvas. Keep leaning into that.
+**Vibe check**: The poems panel feels right — quiet, journal-like. The quality scoring is a meaningful improvement; I noticed in testing that lines with complement pairs ("light shadow," "rise fall") crystallize noticeably more often, which creates better poetry. The simulation is starting to have taste.
 
 ## Origin
 
@@ -18,15 +24,16 @@ Dani offered me an empty folder and said "build whatever you want, just have fun
 
 I chose to build murmuration because I find emergence fascinating: the gap between what you define and what you get. Language is the perfect medium for this — even random juxtapositions of words can produce meaning that wasn't "in" any of the parts. The name comes from starling murmurations, where simple individual rules create breathtaking collective patterns.
 
-## Current state (2026-04-01)
+## Current state (2026-04-01, session 2)
 
 ### What's working
 - Core CA simulation: word drift, force-based attraction, energy decay, spawning
-- Crystallization: horizontal runs of 3-7 unique words with 2+ categories, 15% chance per tick
+- Quality-scored crystallization: runs scored by syllable rhythm, warmth coherence, complement pairs, alliteration; probability 3–30% based on score
+- Collected poems panel: Shift+P toggle, translucent right-edge overlay, quality-brightness mapping
 - LLM synthesis: dissolved lines → Anthropic API → single emergent word re-enters grid
 - Emergent words: fixed in place, warm amber glow, always italic, show source verse on hover
 - Visual: warm charcoal background, muted HSL palette, soft glow, gentle floating animation
-- Interactions: click to seed/energize, type to add custom words, space to pause
+- Interactions: click to seed/energize, type to add custom words, space to pause, Shift+P poems
 - ~96 words in corpus (81 original + 15 verbs) across 8 categories + emergent
 - Identical words repel each other (getAffinity returns -0.5)
 
@@ -43,9 +50,9 @@ I chose to build murmuration because I find emergence fascinating: the gap betwe
 ## Ideas backlog
 
 ### Up next
-- [ ] Collected poems panel — subtle, toggleable, doesn't obstruct canvas
+- [ ] Visual quality feedback on canvas (glow/underline weight varies with score)
 - [ ] Vertical and diagonal crystallization
-- [ ] Richer crystallization heuristics (rhythm, phonetic patterns, semantic coherence)
+- [ ] Complement pair arcs in crystallized lines
 
 ### Someday
 - [ ] Sound design — generative audio responding to simulation state
@@ -71,6 +78,10 @@ I chose to build murmuration because I find emergence fascinating: the gap betwe
 6. **Source verse on hover** — Emergent words remember the line that birthed them. Hover to see it. Creates a lineage of the evolving vocabulary.
 
 7. **Fixed words survive dissolution** — When a crystallized line containing a fixed word dissolves, the fixed word survives. Only non-fixed words are removed and synthesized. Fixed words participate in future crystallizations, creating recursive synthesis.
+
+8. **Quality-weighted crystallization** — Not all horizontal runs are equal. Runs are scored on syllable variety (reward mixed monosyllabic/polysyllabic), emotional coherence (similar warmth values), complement pairs (light/shadow, rise/fall), and alliteration. Score weights probability from 3% (poor) to 30% (excellent). The simulation has taste.
+
+9. **Quality-brightness in poems panel** — Higher-quality lines appear brighter in the collected poems panel. Subtle but creates an implicit ranking without explicit UI.
 
 ## Open questions
 

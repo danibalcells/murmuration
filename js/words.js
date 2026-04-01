@@ -136,6 +136,35 @@ export function getRandomWord() {
   return CORPUS[Math.floor(Math.random() * CORPUS.length)];
 }
 
+export function scorePoetryRun(words) {
+  let score = 0;
+
+  const syllables = words.map(w => w.syllables);
+  const avgSyll = syllables.reduce((a, b) => a + b, 0) / syllables.length;
+  const syllVar = syllables.reduce((s, v) => s + (v - avgSyll) ** 2, 0) / syllables.length;
+  if (syllVar > 0.1 && syllVar < 1.0) score += 0.25;
+  else if (syllVar > 0) score += 0.1;
+
+  const warmths = words.map(w => w.warmth);
+  const avgW = warmths.reduce((a, b) => a + b, 0) / warmths.length;
+  const warmthVar = warmths.reduce((s, v) => s + (v - avgW) ** 2, 0) / warmths.length;
+  score += Math.max(0, 0.25 - warmthVar * 0.4);
+
+  for (let i = 0; i < words.length; i++) {
+    for (let j = i + 1; j < words.length; j++) {
+      if (complementMap.get(words[i].text) === words[j].text) {
+        score += 0.2;
+      }
+    }
+  }
+
+  for (let i = 0; i < words.length - 1; i++) {
+    if (words[i].text[0] === words[i + 1].text[0]) score += 0.1;
+  }
+
+  return Math.min(1, score);
+}
+
 export function getAffinity(w1, w2) {
   if (w1.text === w2.text) return -0.5;
   let affinity = 0;

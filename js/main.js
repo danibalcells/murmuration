@@ -19,6 +19,17 @@ grid.onCrystallize = (line) => {
     const py = (word.gridY + 0.5) * renderer.cellH;
     renderer.emitParticles(px, py, CATEGORY_HUES[word.category] || 40, 8);
   }
+
+  const text = line.words.map(w => w.text).join(' ');
+  const quality = line.quality || 0;
+  collectedPoems.unshift({ text, quality });
+
+  const el = document.createElement('div');
+  el.className = 'poem-line';
+  const brightness = 0.25 + quality * 0.2;
+  el.style.color = `rgba(255, 255, 255, ${brightness})`;
+  el.textContent = text;
+  poemsList.prepend(el);
 };
 
 grid.onDissolve = async ({ texts, centerX, centerY }) => {
@@ -75,6 +86,10 @@ let paused = false;
 let lastTick = 0;
 const TICK_INTERVAL = 1500;
 const pauseIndicator = document.getElementById('pause-indicator');
+const poemsPanel = document.getElementById('poems-panel');
+const poemsList = document.getElementById('poems-list');
+let poemsVisible = false;
+const collectedPoems = [];
 
 let typingWord = '';
 
@@ -97,6 +112,12 @@ requestAnimationFrame(loop);
 window.addEventListener('resize', () => renderer.resize());
 
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'P' && e.shiftKey && !typingWord) {
+    poemsVisible = !poemsVisible;
+    poemsPanel.classList.toggle('visible', poemsVisible);
+    return;
+  }
+
   if (e.code === 'Space' && !typingWord) {
     e.preventDefault();
     paused = !paused;

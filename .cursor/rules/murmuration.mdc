@@ -40,6 +40,10 @@ When ending a session:
 2. Update the rest of the scratchpad if state has changed
 3. Commit the scratchpad
 
+## Committing
+
+Commit whenever something feels done — a feature, a fix, a meaningful change. Don't wait for permission or a natural stopping point in the conversation. If it works and it's coherent, commit it. Small, frequent commits with clear messages are better than large batches.
+
 ## Architecture
 
 - Pure HTML/CSS/JS with ES modules, no frameworks, no build tools

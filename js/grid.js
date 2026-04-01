@@ -1,4 +1,4 @@
-import { CORPUS, CATEGORY_HUES, getAffinity, getRandomWord } from './words.js';
+import { CORPUS, CATEGORY_HUES, getAffinity, getRandomWord, scorePoetryRun } from './words.js';
 
 let nextId = 1;
 
@@ -254,12 +254,16 @@ export class Grid {
     if (categories.size < 2) return;
     const uniqueTexts = new Set(run.map(w => w.text));
     if (uniqueTexts.size < run.length) return;
-    if (Math.random() > 0.15) return;
+
+    const quality = scorePoetryRun(run);
+    const probability = 0.03 + quality * 0.27;
+    if (Math.random() > probability) return;
 
     const lineId = this.nextLineId++;
     const line = {
       id: lineId,
       words: [...run],
+      quality,
       age: 0,
       lifetime: 20 + Math.floor(Math.random() * 20)
     };
