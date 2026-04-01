@@ -48,9 +48,11 @@ grid.onDissolve = async ({ texts, centerX, centerY }) => {
             const wordData = {
               text: synthesized,
               category: 'emergent',
-              warmth: 0.4,
-              weight: 0.3,
-              syllables: Math.max(1, Math.ceil(synthesized.length / 3))
+              warmth: 0.2 + Math.random() * 0.4,
+              weight: 0.2 + Math.random() * 0.3,
+              syllables: Math.max(1, Math.ceil(synthesized.length / 3)),
+              sourceVerse: texts.join(' \u00b7 '),
+              fixed: true
             };
             const w = grid.addWord(wordData, x, y);
             w.energy = 1.0;
@@ -182,4 +184,9 @@ canvas.addEventListener('click', (e) => {
       10
     );
   }
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  renderer.mouseX = e.clientX;
+  renderer.mouseY = e.clientY;
 });

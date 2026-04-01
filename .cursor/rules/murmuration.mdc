@@ -1,0 +1,38 @@
+---
+description: Context, creative vision, and persistence protocol for the murmuration project
+alwaysApply: true
+---
+
+# murmuration
+
+## What this is
+
+A personal creative project: an interactive web experience where poetry emerges from cellular automata. Words drift on a dark canvas, attracted by semantic affinity. When they align, they crystallize into lines. When lines dissolve, an LLM synthesizes them into new emergent words that re-enter the simulation.
+
+## Creative vision
+
+- The intersection of simple rules and emergent beauty
+- Aesthetic: contemplative, organic, warm — never techy or data-viz
+- Every feature should serve the core: watching meaning emerge from drift
+- Restraint over feature bloat. The simulation should feel alive.
+
+## Persistence protocol
+
+A scratchpad lives at `SCRATCHPAD.md` in the project root. It holds current state, ideas backlog, design decisions, and open questions.
+
+When starting a new session on this project:
+1. Read `SCRATCHPAD.md` to recover context and creative direction
+2. Check recent git log (`git log --oneline -10`) for what changed since last session
+3. Update the scratchpad as work progresses
+4. Before ending a session, update `SCRATCHPAD.md` with current state and any new ideas
+
+The scratchpad is committed to the repo. It is the project's living memory.
+
+## Architecture
+
+- Pure HTML/CSS/JS with ES modules, no frameworks, no build tools
+- Node.js server (`server.js`) for static files + Anthropic API proxy
+- Grid-based cellular automata with force-based word movement
+- Canvas rendering at 60fps with cubic interpolation between 1.5s ticks
+- Word corpus across 8 categories + synthesized "emergent" words
+- Emergent words are fixed in place and show their source verse on hover

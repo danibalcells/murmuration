@@ -16,7 +16,8 @@ const COMPLEMENTS = [
   ['bloom', 'fade'], ['breath', 'stone'], ['flame', 'rain'],
   ['beyond', 'within'], ['always', 'never'], ['vast', 'hollow'],
   ['hush', 'call'], ['deep', 'spark'], ['root', 'dust'],
-  ['seed', 'ash'], ['tender', 'thorn'], ['pulse', 'dim']
+  ['seed', 'ash'], ['tender', 'thorn'], ['pulse', 'dim'],
+  ['wake', 'sleep'], ['burn', 'drown']
 ];
 
 const complementMap = new Map();
@@ -38,6 +39,7 @@ export const CORPUS = [
   { text: 'dust', category: 'nature', warmth: -0.1, weight: 0.1, syllables: 1 },
   { text: 'ash', category: 'nature', warmth: -0.2, weight: 0.2, syllables: 1 },
   { text: 'soil', category: 'nature', warmth: 0.3, weight: 0.7, syllables: 1 },
+  { text: 'grow', category: 'nature', warmth: 0.5, weight: 0.3, syllables: 1 },
 
   { text: 'light', category: 'light', warmth: 0.6, weight: 0.1, syllables: 1 },
   { text: 'shadow', category: 'light', warmth: -0.5, weight: 0.4, syllables: 2 },
@@ -48,6 +50,7 @@ export const CORPUS = [
   { text: 'dim', category: 'light', warmth: -0.3, weight: 0.2, syllables: 1 },
   { text: 'gleam', category: 'light', warmth: 0.5, weight: 0.1, syllables: 1 },
   { text: 'flicker', category: 'light', warmth: 0.4, weight: 0.1, syllables: 2 },
+  { text: 'burn', category: 'light', warmth: 0.9, weight: 0.2, syllables: 1 },
 
   { text: 'river', category: 'water', warmth: 0.1, weight: 0.5, syllables: 2 },
   { text: 'tide', category: 'water', warmth: 0.0, weight: 0.6, syllables: 1 },
@@ -58,6 +61,8 @@ export const CORPUS = [
   { text: 'deep', category: 'water', warmth: -0.3, weight: 0.8, syllables: 1 },
   { text: 'pool', category: 'water', warmth: 0.1, weight: 0.5, syllables: 1 },
   { text: 'foam', category: 'water', warmth: 0.2, weight: 0.1, syllables: 1 },
+  { text: 'pour', category: 'water', warmth: 0.1, weight: 0.3, syllables: 1 },
+  { text: 'drown', category: 'water', warmth: -0.4, weight: 0.6, syllables: 1 },
 
   { text: 'silence', category: 'abstract', warmth: -0.2, weight: 0.3, syllables: 2 },
   { text: 'echo', category: 'abstract', warmth: 0.0, weight: 0.2, syllables: 2 },
@@ -72,6 +77,8 @@ export const CORPUS = [
   { text: 'hollow', category: 'abstract', warmth: -0.3, weight: 0.3, syllables: 2 },
   { text: 'vast', category: 'abstract', warmth: -0.1, weight: 0.4, syllables: 1 },
   { text: 'tender', category: 'abstract', warmth: 0.6, weight: 0.2, syllables: 2 },
+  { text: 'know', category: 'abstract', warmth: 0.3, weight: 0.3, syllables: 1 },
+  { text: 'yearn', category: 'abstract', warmth: 0.4, weight: 0.3, syllables: 1 },
 
   { text: 'breath', category: 'body', warmth: 0.5, weight: 0.1, syllables: 1 },
   { text: 'pulse', category: 'body', warmth: 0.4, weight: 0.3, syllables: 1 },
@@ -82,6 +89,9 @@ export const CORPUS = [
   { text: 'voice', category: 'body', warmth: 0.4, weight: 0.2, syllables: 1 },
   { text: 'mouth', category: 'body', warmth: 0.3, weight: 0.3, syllables: 1 },
   { text: 'vein', category: 'body', warmth: 0.2, weight: 0.3, syllables: 1 },
+  { text: 'hold', category: 'body', warmth: 0.5, weight: 0.4, syllables: 1 },
+  { text: 'ache', category: 'body', warmth: -0.1, weight: 0.3, syllables: 1 },
+  { text: 'bind', category: 'body', warmth: 0.1, weight: 0.5, syllables: 1 },
 
   { text: 'dawn', category: 'time', warmth: 0.6, weight: 0.2, syllables: 1 },
   { text: 'dusk', category: 'time', warmth: -0.2, weight: 0.3, syllables: 1 },
@@ -94,6 +104,9 @@ export const CORPUS = [
   { text: 'fade', category: 'time', warmth: -0.2, weight: 0.1, syllables: 1 },
   { text: 'remain', category: 'time', warmth: 0.1, weight: 0.5, syllables: 2 },
   { text: 'linger', category: 'time', warmth: 0.2, weight: 0.3, syllables: 2 },
+  { text: 'keep', category: 'time', warmth: 0.2, weight: 0.4, syllables: 1 },
+  { text: 'wake', category: 'time', warmth: 0.5, weight: 0.2, syllables: 1 },
+  { text: 'sleep', category: 'time', warmth: -0.1, weight: 0.3, syllables: 1 },
 
   { text: 'fall', category: 'movement', warmth: -0.1, weight: 0.4, syllables: 1 },
   { text: 'rise', category: 'movement', warmth: 0.4, weight: 0.2, syllables: 1 },
@@ -106,6 +119,8 @@ export const CORPUS = [
   { text: 'unfold', category: 'movement', warmth: 0.3, weight: 0.2, syllables: 2 },
   { text: 'sway', category: 'movement', warmth: 0.2, weight: 0.2, syllables: 1 },
   { text: 'trace', category: 'movement', warmth: 0.1, weight: 0.2, syllables: 1 },
+  { text: 'bend', category: 'movement', warmth: 0.0, weight: 0.3, syllables: 1 },
+  { text: 'weave', category: 'movement', warmth: 0.3, weight: 0.3, syllables: 1 },
 
   { text: 'hum', category: 'sound', warmth: 0.3, weight: 0.2, syllables: 1 },
   { text: 'whisper', category: 'sound', warmth: 0.2, weight: 0.1, syllables: 2 },
@@ -113,7 +128,8 @@ export const CORPUS = [
   { text: 'murmur', category: 'sound', warmth: 0.3, weight: 0.2, syllables: 2 },
   { text: 'hush', category: 'sound', warmth: -0.1, weight: 0.1, syllables: 1 },
   { text: 'song', category: 'sound', warmth: 0.5, weight: 0.2, syllables: 1 },
-  { text: 'call', category: 'sound', warmth: 0.2, weight: 0.3, syllables: 1 }
+  { text: 'call', category: 'sound', warmth: 0.2, weight: 0.3, syllables: 1 },
+  { text: 'sing', category: 'sound', warmth: 0.5, weight: 0.2, syllables: 1 }
 ];
 
 export function getRandomWord() {
@@ -121,6 +137,7 @@ export function getRandomWord() {
 }
 
 export function getAffinity(w1, w2) {
+  if (w1.text === w2.text) return -0.5;
   let affinity = 0;
   if (w1.category === w2.category) affinity += 0.3;
   if (w1.text[0] === w2.text[0]) affinity += 0.15;

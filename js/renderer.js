@@ -8,6 +8,8 @@ export class Renderer {
     this.particles = [];
     this.startTime = -1;
     this.typingText = '';
+    this.mouseX = -1;
+    this.mouseY = -1;
     this.resize();
   }
 
@@ -59,6 +61,8 @@ export class Renderer {
     const fontSize = Math.max(15, Math.min(26, this.cellW * 0.24));
     const globalAlpha = Math.min(1, (timestamp - this.startTime) / 3000);
 
+    let hoveredWord = null;
+
     for (const word of this.grid.words.values()) {
       const gx = word.prevGridX + (word.gridX - word.prevGridX) * t;
       const gy = word.prevGridY + (word.gridY - word.prevGridY) * t;
@@ -66,30 +70,58 @@ export class Renderer {
       let px = (gx + 0.5) * this.cellW;
       let py = (gy + 0.5) * this.cellH;
 
-      px += Math.sin(timestamp * 0.0008 + word.id * 2.3) * 3;
-      py += Math.cos(timestamp * 0.001 + word.id * 1.9) * 2;
+      if (!word.fixed) {
+        px += Math.sin(timestamp * 0.0008 + word.id * 2.3) * 3;
+        py += Math.cos(timestamp * 0.001 + word.id * 1.9) * 2;
+      }
 
+      if (this.mouseX >= 0) {
+        const dist = Math.hypot(this.mouseX - px, this.mouseY - py);
+        if (dist < this.cellW * 0.4) {
+          hoveredWord = word;
+        }
+      }
+
+      const isEmergent = word.category === 'emergent';
       const hue = CATEGORY_HUES[word.category] || 40;
       const breathe = 0.85 + 0.15 * Math.sin(timestamp * 0.002 + word.id * 1.7);
 
       if (word.createdAt < 0) word.createdAt = timestamp;
       const fadeIn = Math.min(1, (timestamp - word.createdAt) / 1500);
 
-      const alpha = (0.4 + word.energy * 0.6) * breathe * fadeIn * globalAlpha;
-      const saturation = 30 + word.energy * 25;
-      const lightness = 50 + word.energy * 20;
+      const baseAlpha = isEmergent ? 0.6 : 0.4;
+      const alpha = (baseAlpha + word.energy * (1 - baseAlpha)) * breathe * fadeIn * globalAlpha;
+      const saturation = isEmergent ? 45 + word.energy * 30 : 30 + word.energy * 25;
+      const lightness = isEmergent ? 60 + word.energy * 15 : 50 + word.energy * 20;
 
-      ctx.font = `${word.locked ? 'italic ' : ''}300 ${fontSize}px 'Cormorant Garamond', Georgia, serif`;
+      const wordFontSize = isEmergent ? fontSize * 1.15 : fontSize;
+      const useItalic = word.locked || isEmergent;
+      ctx.font = `${useItalic ? 'italic ' : ''}300 ${wordFontSize}px 'Cormorant Garamond', Georgia, serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      ctx.shadowBlur = word.locked ? 15 : 8 * word.energy;
+      if (isEmergent) {
+        ctx.shadowBlur = 20;
+      } else {
+        ctx.shadowBlur = word.locked ? 15 : 8 * word.energy;
+      }
       ctx.shadowColor = `hsla(${hue}, ${Math.round(saturation * 0.7)}%, ${lightness}%, ${alpha * 0.3})`;
 
       ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
       ctx.fillText(word.text, px, py);
 
       ctx.shadowBlur = 0;
+    }
+
+    if (hoveredWord && hoveredWord.sourceVerse) {
+      const hpx = (hoveredWord.gridX + 0.5) * this.cellW;
+      const hpy = (hoveredWord.gridY + 0.5) * this.cellH - fontSize * 1.3;
+      ctx.font = `300 italic ${fontSize * 0.6}px 'Cormorant Garamond', Georgia, serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.22 * globalAlpha})`;
+      ctx.fillText(hoveredWord.sourceVerse, hpx, hpy);
     }
 
     for (const line of this.grid.lines.values()) {

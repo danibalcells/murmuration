@@ -17,7 +17,7 @@ export class Grid {
   init(density = 0.2) {
     const totalCells = this.cols * this.rows;
     const targetCount = Math.floor(totalCells * density);
-    const categories = Object.keys(CATEGORY_HUES);
+    const categories = Object.keys(CATEGORY_HUES).filter(c => c !== 'emergent');
 
     const clusterCount = 4 + Math.floor(Math.random() * 3);
     const clusters = [];
@@ -87,7 +87,9 @@ export class Grid {
       age: 0,
       locked: false,
       lineId: null,
-      createdAt: -1
+      createdAt: -1,
+      fixed: wordData.fixed || false,
+      sourceVerse: wordData.sourceVerse || null
     };
     this.cells[this.idx(x, y)] = word;
     this.words.set(word.id, word);
@@ -132,17 +134,17 @@ export class Grid {
       word.age++;
       const neighbors = this.getNeighborWords(word.gridX, word.gridY, 2);
       word.energy += neighbors.length * 0.008;
-      word.energy -= 0.015;
-      word.energy = Math.max(0, Math.min(1, word.energy));
+      if (!word.fixed) word.energy -= 0.015;
+      word.energy = Math.max(word.fixed ? 0.6 : 0, Math.min(1, word.energy));
     }
 
     for (const word of allWords) {
-      if (word.energy <= 0 && !word.locked) {
+      if (word.energy <= 0 && !word.locked && !word.fixed) {
         this.removeWord(word);
       }
     }
 
-    const movable = [...this.words.values()].filter(w => !w.locked);
+    const movable = [...this.words.values()].filter(w => !w.locked && !w.fixed);
     for (let i = movable.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [movable[i], movable[j]] = [movable[j], movable[i]];
@@ -209,7 +211,12 @@ export class Grid {
         const centerY = line.words[0].gridY;
 
         for (const word of line.words) {
-          this.removeWord(word);
+          if (word.fixed) {
+            word.locked = false;
+            word.lineId = null;
+          } else {
+            this.removeWord(word);
+          }
         }
 
         this.lines.delete(lineId);
