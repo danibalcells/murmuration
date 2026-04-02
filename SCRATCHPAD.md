@@ -2,11 +2,9 @@
 
 ## Handoff
 
-Deployed to Vercel this session. Created `api/synthesize.js` as a proper Vercel Function (same logic as server.js, just adapted to the req/res handler format). `server.js` still works for local dev. ANTHROPIC_API_KEY is set in Vercel's production environment. Stable URL: https://murmuration-sigma.vercel.app
+Two UX fixes per Dani's feedback. Poem panel now starts open by default — the "emerging" header creates anticipation before the first verse arrives. When closed, the stream indicator is wider, brighter, and has a larger click target (18px invisible area with a 4px visible bar). Fixed a bug where the simulation stopped producing verses in background tabs: the tick loop was tied to requestAnimationFrame, which browsers throttle/pause when the tab isn't active. Ticks now run on setInterval (unaffected at 1.5s intervals), with a visibilitychange catch-up handler that runs up to 10 missed ticks when the tab regains focus — handles Chrome's intensive throttling after 5 minutes.
 
-Previous session: Redesigned the synthesis prompt. Four layers now: system prompt (voice/constraints), arc guidance (shifts as poem grows through imagistic → connective → paradox → spacious), anti-repetition (blocks recent motifs AND dissolved source words), and random micro-constraints per verse ("use only monosyllabic words", "start with a verb", "write a fragment"). Also added stanza breaks in the stream (every 5-7 verses), duplicate emergent word prevention, and fixed text contrast/visibility per Dani's feedback.
-
-Next: crystal→verse visual linking in the stream (you see crystals and verses interleaved but can't tell which crystal became which verse). Also: smarter word extraction.
+Next: crystal→verse visual linking in the stream. Also: smarter word extraction.
 
 ## Reflections
 
@@ -32,7 +30,9 @@ Core loop works end to end with substantially improved synthesis. The prompt has
 
 Stanza breaks appear in the stream every 5-7 verses. Duplicate emergent words are now prevented. Categories from dissolved words influence the prompt's tonal direction.
 
-Text contrast improved: verses at 0.7 opacity (was 0.45), crystal lines at 0.25 (was 0.12), stream indicator 3px at 0.18 (was 2px at 0.08).
+Text contrast improved: verses at 0.7 opacity (was 0.45), crystal lines at 0.25 (was 0.12), stream indicator 4px at 0.28 with 18px click target.
+
+Tick loop decoupled from rendering — setInterval for simulation ticks (runs in background tabs), requestAnimationFrame for rendering only. Visibilitychange handler catches up missed ticks on tab focus.
 
 ~96 words in corpus across 8 categories. Quality-scored crystallization (3-30% probability based on rhythm, warmth coherence, complement pairs, alliteration).
 
@@ -68,7 +68,7 @@ Text contrast improved: verses at 0.7 opacity (was 0.45), crystal lines at 0.25 
 
 **Stream over collection.** The panel is a living stream, not a static list. Crystal lines appear dim (raw material), verses appear warm (the poetry). The process is visible.
 
-**Auto-open, respect close.** Panel auto-opens on first verse. If the user closes it, subsequent verses just pulse the indicator.
+**Open by default.** Panel starts visible — the empty "emerging" header creates anticipation. If the user closes it, subsequent verses pulse the indicator. The indicator has a wide invisible click area for easy reopening.
 
 **Micro-constraints for variety.** Random per-verse constraints (fragments, monosyllables, unusual verbs) produce more varied poetry than unconstrained prompting. Limitation as liberation.
 

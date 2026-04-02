@@ -96,14 +96,14 @@ grid.onDissolve = async ({ texts, centerX, centerY, categories }) => {
 };
 
 let paused = false;
-let lastTick = 0;
+let lastTickTime = performance.now();
 const TICK_INTERVAL = 1500;
 const pauseIndicator = document.getElementById('pause-indicator');
 const poemsPanel = document.getElementById('poems-panel');
 const poemsList = document.getElementById('poems-list');
 const streamIndicator = document.getElementById('stream-indicator');
-let poemsVisible = false;
-let hasEverOpened = false;
+let poemsVisible = true;
+let hasEverOpened = true;
 const verseHistory = [];
 let totalVerseCount = 0;
 let versesSinceBreak = 0;
@@ -122,9 +122,7 @@ function addToStream(type, text) {
   el.textContent = text;
   poemsList.appendChild(el);
 
-  if (type === 'verse' && !poemsVisible && !hasEverOpened) {
-    showPanel();
-  } else if (type === 'verse' && !poemsVisible) {
+  if (type === 'verse' && !poemsVisible) {
     streamIndicator.classList.add('pulse');
     setTimeout(() => streamIndicator.classList.remove('pulse'), 2000);
   }
@@ -154,17 +152,31 @@ function hidePanel() {
 
 let typingWord = '';
 
-function loop(timestamp) {
-  if (!lastTick) lastTick = timestamp;
-
+setInterval(() => {
   if (!paused) {
-    if (timestamp - lastTick >= TICK_INTERVAL) {
-      grid.tick();
-      lastTick = timestamp;
-    }
-    renderer.render((timestamp - lastTick) / TICK_INTERVAL, timestamp);
+    grid.tick();
+    lastTickTime = performance.now();
   }
+}, TICK_INTERVAL);
 
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden || paused) return;
+  const now = performance.now();
+  const missed = Math.floor((now - lastTickTime) / TICK_INTERVAL);
+  if (missed > 1) {
+    const catchUp = Math.min(missed, 10);
+    for (let i = 0; i < catchUp; i++) {
+      grid.tick();
+    }
+    lastTickTime = now;
+  }
+});
+
+function loop(timestamp) {
+  if (!paused) {
+    const t = Math.min((performance.now() - lastTickTime) / TICK_INTERVAL, 1);
+    renderer.render(t, timestamp);
+  }
   requestAnimationFrame(loop);
 }
 
@@ -191,7 +203,7 @@ document.addEventListener('keydown', (e) => {
   if (e.code === 'Space' && !typingWord) {
     e.preventDefault();
     paused = !paused;
-    if (!paused) lastTick = performance.now();
+    if (!paused) lastTickTime = performance.now();
     pauseIndicator.style.opacity = paused ? '1' : '0';
     return;
   }
