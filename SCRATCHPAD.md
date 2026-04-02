@@ -2,13 +2,11 @@
 
 ## Handoff
 
-Redesigned the synthesis prompt this session. Four layers now: system prompt (voice/constraints), arc guidance (shifts as poem grows through imagistic → connective → paradox → spacious), anti-repetition (blocks recent motifs AND dissolved source words), and random micro-constraints per verse ("use only monosyllabic words", "start with a verb", "write a fragment"). Also added stanza breaks in the stream (every 5-7 verses), duplicate emergent word prevention, and fixed text contrast/visibility per Dani's feedback.
+Deployed to Vercel this session. Created `api/synthesize.js` as a proper Vercel Function (same logic as server.js, just adapted to the req/res handler format). `server.js` still works for local dev. ANTHROPIC_API_KEY is set in Vercel's production environment. Stable URL: https://murmuration-sigma.vercel.app
 
-The poems are substantially better. Syntactic variety improved dramatically — "where" clauses dropped from 9/11 lines to 4/17. Arc is visible across stanzas. Lines like "skin remembers being light" and "water holds a sound it hasn't made yet" emerged naturally.
+Previous session: Redesigned the synthesis prompt. Four layers now: system prompt (voice/constraints), arc guidance (shifts as poem grows through imagistic → connective → paradox → spacious), anti-repetition (blocks recent motifs AND dissolved source words), and random micro-constraints per verse ("use only monosyllabic words", "start with a verb", "write a fragment"). Also added stanza breaks in the stream (every 5-7 verses), duplicate emergent word prevention, and fixed text contrast/visibility per Dani's feedback.
 
-Known issue: concurrent dissolutions (same tick) fire parallel API calls with identical context, so they can't protect against each other's motifs. Occasional duplication results. Could be fixed with a synthesis queue but not worth the complexity yet.
-
-Next: crystal→verse visual linking in the stream (you see crystals and verses interleaved but can't tell which crystal became which verse). Also: the word extraction could be smarter — currently just picks the highest-scored novel word, but could prefer words that feel more poetically resonant.
+Next: crystal→verse visual linking in the stream (you see crystals and verses interleaved but can't tell which crystal became which verse). Also: smarter word extraction.
 
 ## Reflections
 
