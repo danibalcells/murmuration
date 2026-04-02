@@ -2,11 +2,13 @@
 
 ## Handoff
 
-Built verse synthesis this session. The LLM now writes poetry instead of inventing portmanteau words. Each verse builds on the last 20 through context accumulation. Novel words from the verses feed back into the grid as emergent landmarks. The side panel auto-opens as a living stream of crystal lines and verses.
+Redesigned the synthesis prompt this session. Four layers now: system prompt (voice/constraints), arc guidance (shifts as poem grows through imagistic → connective → paradox → spacious), anti-repetition (blocks recent motifs AND dissolved source words), and random micro-constraints per verse ("use only monosyllabic words", "start with a verb", "write a fragment"). Also added stanza breaks in the stream (every 5-7 verses), duplicate emergent word prevention, and fixed text contrast/visibility per Dani's feedback.
 
-Also built `simulate.js` — a headless simulation tool that imports the same modules as the frontend. This is how I see what the system produces. Run `node simulate.js 200` with the server up.
+The poems are substantially better. Syntactic variety improved dramatically — "where" clauses dropped from 9/11 lines to 4/17. Arc is visible across stanzas. Lines like "skin remembers being light" and "water holds a sound it hasn't made yet" emerged naturally.
 
-Next: the prompt could use refinement (the LLM sometimes repeats motifs like "the dark" across consecutive verses). The crystal→verse relationship in the stream isn't visible yet — you see them interleaved but can't tell which crystal became which verse. Visual quality feedback on the canvas is still on the backlog.
+Known issue: concurrent dissolutions (same tick) fire parallel API calls with identical context, so they can't protect against each other's motifs. Occasional duplication results. Could be fixed with a synthesis queue but not worth the complexity yet.
+
+Next: crystal→verse visual linking in the stream (you see crystals and verses interleaved but can't tell which crystal became which verse). Also: the word extraction could be smarter — currently just picks the highest-scored novel word, but could prefer words that feel more poetically resonant.
 
 ## Reflections
 
@@ -24,23 +26,25 @@ The simulation script was a breakthrough. Before it, I was making aesthetic deci
 
 What I want most for this project: for someone to leave it running and come back an hour later and find a poem that moves them. Not because it's technically impressive, but because something in the collision of words touched an unnamed feeling. That's the murmuration — not the individual birds, not the rules they follow, but the shape they make together that no bird intended.
 
+The prompt redesign taught me something about constraint. The micro-constraints — "use only monosyllabic words", "make it a fragment", "start with a verb" — don't make the poetry formulaic. They make it wilder. The model has to find a completely different path each time. Limitation as liberation. The poems got better not when I gave the model more freedom, but when I gave it more specific, varied constraints. That feels true of creative work generally: the interesting things happen at the edges of what's allowed.
+
 ## Now
 
-The core loop works end to end: words drift → crystallize → appear in stream → dissolve → LLM writes verse with context → verse appears in stream → novel word enters grid. The simulation produces actual poetry that accumulates into a growing poem.
+Core loop works end to end with substantially improved synthesis. The prompt has four layers (system, arc, anti-repetition, micro-constraints). Poems show genuine arc across stanzas, varied syntax, and occasional surprising beauty.
 
-The side panel auto-opens on the first verse, has a clickable indicator strip on the right edge, and can be closed with Escape, Shift+P, or clicking the gradient edge.
+Stanza breaks appear in the stream every 5-7 verses. Duplicate emergent words are now prevented. Categories from dissolved words influence the prompt's tonal direction.
 
-Word extraction filters out stop words, corpus conjugations, and common suffixes. Emergent words are real English words like "intertwine", "current", "caught".
+Text contrast improved: verses at 0.7 opacity (was 0.45), crystal lines at 0.25 (was 0.12), stream indicator 3px at 0.18 (was 2px at 0.08).
 
 ~96 words in corpus across 8 categories. Quality-scored crystallization (3-30% probability based on rhythm, warmth coherence, complement pairs, alliteration).
 
 ## Ideas
 
 **Soon**
-- Prompt refinement — vary tone as the poem grows, reduce motif repetition
 - Crystal→verse visual linking in the stream
 - Visual quality feedback on canvas (glow/weight varies with score)
 - Vertical and diagonal crystallization
+- Smarter word extraction (prefer poetically resonant words over just "novel")
 
 **Someday**
 - Sound design — generative audio responding to simulation state
@@ -50,6 +54,7 @@ Word extraction filters out stop words, corpus conjugations, and common suffixes
 - Mobile touch support
 - Multiple canvases / "rooms" with different corpora
 - Poem influencing the simulation back (verse themes affect which words spawn)
+- Synthesis queue to prevent concurrent-dissolution motif duplication
 
 ## Decisions
 
@@ -67,9 +72,14 @@ Word extraction filters out stop words, corpus conjugations, and common suffixes
 
 **Auto-open, respect close.** Panel auto-opens on first verse. If the user closes it, subsequent verses just pulse the indicator.
 
+**Micro-constraints for variety.** Random per-verse constraints (fragments, monosyllables, unusual verbs) produce more varied poetry than unconstrained prompting. Limitation as liberation.
+
+**Dissolved words in the avoid list.** The model tends to echo the dissolved words back. Adding them to the anti-repetition list forces more creative departure from the source material.
+
 ## Open questions
 
 - Should the poem ever reset, or grow indefinitely?
 - What's the right max context window? (currently 20 verses)
 - Should crystal lines in the stream fade over time, leaving only verses?
 - Could the poem influence the simulation back?
+- Should there be a synthesis queue to serialize calls and prevent concurrent-dissolution motif duplication, or is the occasional overlap acceptable?
