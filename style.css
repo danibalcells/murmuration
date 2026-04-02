@@ -71,10 +71,10 @@ canvas {
   position: fixed;
   top: 50%;
   right: 0;
-  width: 2px;
+  width: 3px;
   height: 60px;
   transform: translateY(-50%);
-  background: rgba(255, 220, 180, 0.08);
+  background: rgba(255, 220, 180, 0.18);
   border-radius: 1px;
   cursor: pointer;
   z-index: 11;
@@ -82,8 +82,8 @@ canvas {
 }
 
 #stream-indicator:hover {
-  background: rgba(255, 220, 180, 0.2);
-  width: 3px;
+  background: rgba(255, 220, 180, 0.35);
+  width: 4px;
   height: 80px;
 }
 
@@ -92,8 +92,8 @@ canvas {
 }
 
 @keyframes indicatorPulse {
-  0% { background: rgba(255, 200, 140, 0.4); height: 80px; }
-  100% { background: rgba(255, 220, 180, 0.08); height: 60px; }
+  0% { background: rgba(255, 200, 140, 0.5); height: 80px; }
+  100% { background: rgba(255, 220, 180, 0.18); height: 60px; }
 }
 
 #poems-panel {
@@ -140,7 +140,7 @@ canvas {
   font-weight: 300;
   letter-spacing: 0.3em;
   text-transform: lowercase;
-  color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.25);
   margin-bottom: 20px;
   user-select: none;
   flex-shrink: 0;
@@ -162,7 +162,7 @@ canvas {
   font-size: 12px;
   font-weight: 300;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.25);
   margin-bottom: 6px;
   letter-spacing: 0.05em;
   opacity: 0;
@@ -175,7 +175,7 @@ canvas {
   font-weight: 300;
   font-style: italic;
   line-height: 1.8;
-  color: rgba(255, 220, 180, 0.45);
+  color: rgba(255, 220, 180, 0.7);
   margin-top: 4px;
   margin-bottom: 20px;
   opacity: 0;
