@@ -183,6 +183,11 @@ canvas {
   animation: verseFadeIn 2s ease-out forwards;
 }
 
+.stream-break {
+  height: 24px;
+  flex-shrink: 0;
+}
+
 @keyframes streamFadeIn {
   to { opacity: 1; }
 }

@@ -24,7 +24,7 @@ grid.onCrystallize = (line) => {
   addToStream('crystal', text);
 };
 
-grid.onDissolve = async ({ texts, centerX, centerY }) => {
+grid.onDissolve = async ({ texts, centerX, centerY, categories }) => {
   renderer.emitParticles(
     (centerX + 0.5) * renderer.cellW,
     (centerY + 0.5) * renderer.cellH,
@@ -35,19 +35,33 @@ grid.onDissolve = async ({ texts, centerX, centerY }) => {
     const res = await fetch('/api/synthesize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ words: texts, context: verseHistory })
+      body: JSON.stringify({
+        words: texts,
+        context: verseHistory,
+        verseCount: totalVerseCount,
+        categories
+      })
     });
 
     if (!res.ok) return;
     const { verse, word: newWord } = await res.json();
 
     if (verse) {
+      totalVerseCount++;
       verseHistory.push(verse);
       if (verseHistory.length > 20) verseHistory.shift();
+
+      versesSinceBreak++;
+      if (versesSinceBreak >= nextBreakAt) {
+        addToStream('break');
+        versesSinceBreak = 0;
+        nextBreakAt = 5 + Math.floor(Math.random() * 3);
+      }
+
       addToStream('verse', verse);
     }
 
-    if (newWord) {
+    if (newWord && !grid.hasWordText(newWord)) {
       for (let r = 0; r <= 3; r++) {
         for (let dx = -r; dx <= r; dx++) {
           for (let dy = -r; dy <= r; dy++) {
@@ -91,8 +105,18 @@ const streamIndicator = document.getElementById('stream-indicator');
 let poemsVisible = false;
 let hasEverOpened = false;
 const verseHistory = [];
+let totalVerseCount = 0;
+let versesSinceBreak = 0;
+let nextBreakAt = 5 + Math.floor(Math.random() * 3);
 
 function addToStream(type, text) {
+  if (type === 'break') {
+    const el = document.createElement('div');
+    el.className = 'stream-break';
+    poemsList.appendChild(el);
+    return;
+  }
+
   const el = document.createElement('div');
   el.className = type === 'verse' ? 'stream-verse' : 'stream-crystal';
   el.textContent = text;

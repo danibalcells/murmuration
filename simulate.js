@@ -13,6 +13,8 @@ const verseHistory = [];
 let crystalCount = 0;
 let dissolveCount = 0;
 let verseCount = 0;
+let versesSinceBreak = 0;
+let nextBreakAt = 5 + Math.floor(Math.random() * 3);
 
 grid.onCrystallize = (line) => {
   crystalCount++;
@@ -22,7 +24,7 @@ grid.onCrystallize = (line) => {
   console.log(`  \x1b[2m⬡ crystallized (q=${quality.toFixed(2)}): ${text}\x1b[0m`);
 };
 
-grid.onDissolve = async ({ texts, centerX, centerY }) => {
+grid.onDissolve = async ({ texts, centerX, centerY, categories }) => {
   dissolveCount++;
   const lineText = texts.join(' ');
   console.log(`  \x1b[2m⬡ dissolved: ${lineText}\x1b[0m`);
@@ -31,7 +33,12 @@ grid.onDissolve = async ({ texts, centerX, centerY }) => {
     const res = await fetch('http://localhost:3000/api/synthesize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ words: texts, context: verseHistory })
+      body: JSON.stringify({
+        words: texts,
+        context: verseHistory,
+        verseCount,
+        categories: categories || []
+      })
     });
 
     if (!res.ok) return;
@@ -41,6 +48,15 @@ grid.onDissolve = async ({ texts, centerX, centerY }) => {
       verseCount++;
       verseHistory.push(verse);
       if (verseHistory.length > 20) verseHistory.shift();
+
+      versesSinceBreak++;
+      if (versesSinceBreak >= nextBreakAt) {
+        stream.push({ type: 'break' });
+        console.log();
+        versesSinceBreak = 0;
+        nextBreakAt = 5 + Math.floor(Math.random() * 3);
+      }
+
       stream.push({ type: 'verse', text: verse, from: lineText });
       console.log(`  \x1b[33m✦ verse: ${verse}\x1b[0m`);
       if (newWord) {
@@ -54,6 +70,7 @@ grid.onDissolve = async ({ texts, centerX, centerY }) => {
 };
 
 function placeEmergentWord(text, verse, centerX, centerY) {
+  if (grid.hasWordText(text)) return;
   const wordData = {
     text,
     category: 'emergent',
@@ -94,10 +111,12 @@ console.log(`\n${'─'.repeat(50)}`);
 console.log(`\n  ${crystalCount} crystallizations, ${dissolveCount} dissolutions, ${verseCount} verses\n`);
 console.log(`${'─'.repeat(50)}`);
 
-if (verseHistory.length > 0) {
+const verses = stream.filter(s => s.type === 'verse' || s.type === 'break');
+if (verses.length > 0) {
   console.log(`\n  THE POEM\n`);
-  for (const v of verseHistory) {
-    console.log(`  ${v}`);
+  for (const entry of verses) {
+    if (entry.type === 'break') console.log();
+    else console.log(`  ${entry.text}`);
   }
   console.log();
 }

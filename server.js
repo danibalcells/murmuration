@@ -81,6 +81,97 @@ function extractNewWord(verse) {
   return scored[0]?.word || null;
 }
 
+const CATEGORY_TONES = {
+  nature: 'earth, growth, decay',
+  light: 'luminance, shadow, warmth',
+  water: 'depth, flow, surface',
+  abstract: 'interiority, space, what cannot be held',
+  body: 'sensation, presence, the physical',
+  time: 'duration, stillness, change',
+  movement: 'gesture, direction, the body in motion',
+  sound: 'resonance, quiet, vibration',
+  emergent: 'what has already emerged from this poem'
+};
+
+const SYSTEM_PROMPT = `You are a voice inside a living poem. Words drift on a dark canvas, drawn together by hidden affinities. When they align, they crystallize into phrases. When phrases dissolve, you write the next line.
+
+You are not explaining the process. You are the poem. Each line joins what came before into a single growing work.
+
+Constraints:
+- One line, 3–8 words
+- Lowercase, no ending punctuation
+- Prefer the concrete and the felt over the conceptual
+- No filler words. Every word must earn its place
+- Never begin a line with "and", "the", or "a"
+- Vary your syntax — not every line should be a noun phrase or a declarative`;
+
+function getArcGuidance(verseCount) {
+  if (verseCount <= 3) {
+    return 'This poem is just beginning. Write something that could be a first image — singular, precise, unexplained. A seed, not a statement.';
+  }
+  if (verseCount <= 8) {
+    return 'The poem is finding its shape. Let this line reach toward what came before — not by repeating, but by rhyming in feeling. Something is accumulating.';
+  }
+  if (verseCount <= 14) {
+    return 'The poem has weight now. You can afford a turn — a paradox, a tension, a question embedded in an image. Surprise yourself.';
+  }
+  return 'The poem has said enough to be generous. Write with more space. Let silence into the line. Something opening, not closing.';
+}
+
+function extractRecentMotifs(context) {
+  if (!context || context.length === 0) return [];
+  const recent = context.slice(-3);
+  const words = recent.join(' ').toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/);
+  return words.filter(w =>
+    w.length > 3 && !STOP_WORDS.has(w) && !['into', 'from', 'what', 'where', 'when'].includes(w)
+  );
+}
+
+const MICRO_CONSTRAINTS = [
+  'Try an unusual verb — one that surprises even you.',
+  'No linking words (where, when, while, how, that). Pure image.',
+  'End the line with its most important word.',
+  'Make it a fragment, not a sentence.',
+  'Use only monosyllabic words.',
+  'Start with a verb.',
+  'Include a color without naming it directly.',
+  'Let the line contain a contradiction.',
+  'Write something tender.',
+  'Use a word from the body.',
+  'Make the line feel like a question without using a question mark.',
+  'Write the shortest line you can. Three or four words.',
+];
+
+function buildPrompt(words, context, verseCount, categories) {
+  const tones = [...new Set(categories.map(c => CATEGORY_TONES[c]).filter(Boolean))];
+  const toneLine = tones.length > 0
+    ? `The dissolved words carry the feeling of: ${tones.join('; ')}.`
+    : '';
+
+  const recentMotifs = extractRecentMotifs(context);
+  const allAvoid = [...new Set([...recentMotifs, ...words.map(w => w.toLowerCase())])].slice(0, 12);
+  const avoidLine = allAvoid.length > 0
+    ? `\nDo not use any of these words or their close synonyms: ${allAvoid.join(', ')}. Depart from them — let them inspire direction, not vocabulary.`
+    : '';
+
+  const contextPart = context && context.length > 0
+    ? `\nThe poem so far:\n${context.join('\n')}`
+    : '';
+
+  const arcGuidance = getArcGuidance(verseCount);
+
+  const micro = MICRO_CONSTRAINTS[Math.floor(Math.random() * MICRO_CONSTRAINTS.length)];
+
+  return `Dissolved words: ${words.join(', ')}
+${toneLine}${contextPart}
+
+${arcGuidance}${avoidLine}
+
+Constraint for this line: ${micro}
+
+Write the next line.`;
+}
+
 async function handleSynthesize(req, res) {
   if (!client) {
     res.writeHead(503, { 'Content-Type': 'application/json' });
@@ -92,18 +183,17 @@ async function handleSynthesize(req, res) {
   for await (const chunk of req) body += chunk;
 
   try {
-    const { words, context } = JSON.parse(body);
+    const { words, context, verseCount = 0, categories = [] } = JSON.parse(body);
 
-    const contextPart = context && context.length > 0
-      ? `\n\nThe poem growing so far:\n${context.join('\n')}`
-      : '';
+    const prompt = buildPrompt(words, context, verseCount, categories);
 
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 40,
+      max_tokens: 30,
+      system: SYSTEM_PROMPT,
       messages: [{
         role: 'user',
-        content: `These words dissolved from a drifting pattern: ${words.join(', ')}.${contextPart}\n\nWrite the next line of the poem. One line, 3-8 words. Quiet, precise, luminous. Lowercase, no ending punctuation. Just the line.`
+        content: prompt
       }]
     });
 

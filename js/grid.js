@@ -101,6 +101,13 @@ export class Grid {
     this.words.delete(word.id);
   }
 
+  hasWordText(text) {
+    for (const w of this.words.values()) {
+      if (w.text === text) return true;
+    }
+    return false;
+  }
+
   moveWord(word, newX, newY) {
     this.cells[this.idx(word.gridX, word.gridY)] = null;
     word.prevGridX = word.gridX;
@@ -205,6 +212,7 @@ export class Grid {
       line.age++;
       if (line.age > line.lifetime) {
         const texts = line.words.map(w => w.text);
+        const categories = [...new Set(line.words.map(w => w.category))];
         const centerX = Math.round(
           line.words.reduce((s, w) => s + w.gridX, 0) / line.words.length
         );
@@ -220,7 +228,7 @@ export class Grid {
         }
 
         this.lines.delete(lineId);
-        if (this.onDissolve) this.onDissolve({ texts, centerX, centerY });
+        if (this.onDissolve) this.onDissolve({ texts, centerX, centerY, categories });
       }
     }
 
