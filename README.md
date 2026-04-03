@@ -1,5 +1,7 @@
 # murmuration
 
+![murmuration](murmuration.png)
+
 Poetry emerging from cellular automata. Words drift, attract, and crystallize into fleeting lines — then dissolve into something new.
 
 ## Setup
