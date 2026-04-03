@@ -138,7 +138,6 @@ function showPanel() {
   poemsVisible = true;
   hasEverOpened = true;
   poemsPanel.classList.add('visible');
-  streamIndicator.classList.add('hidden');
   requestAnimationFrame(() => {
     poemsList.scrollTop = poemsList.scrollHeight;
   });
@@ -147,7 +146,6 @@ function showPanel() {
 function hidePanel() {
   poemsVisible = false;
   poemsPanel.classList.remove('visible');
-  streamIndicator.classList.remove('hidden');
 }
 
 let typingWord = '';
